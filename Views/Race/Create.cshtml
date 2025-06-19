@@ -1,0 +1,339 @@
+﻿@using RunGroopWebApp.Data.Enum
+@using RunGroopWebApp.ViewModels
+@model CreateRaceViewModel
+@{
+    ViewData["Title"] = "Create Race";
+    Layout = "_Layout";
+}
+
+<style>
+    .create-hero {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        color: white;
+    }
+    
+    .create-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+        margin-top: -2rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .card-header-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-header-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="90" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    }
+    
+    .header-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+    
+    .header-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .form-section {
+        padding: 2.5rem;
+    }
+    
+    .section-title {
+        color: #2d3748;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group-enhanced {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-label-modern {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-control-enhanced {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+    
+    .form-control-enhanced:focus {
+        border-color: #ff6b6b;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        background: white;
+        outline: none;
+    }
+    
+    .form-control-enhanced:hover {
+        border-color: #cbd5e0;
+        background: white;
+    }
+    
+    .btn-create-modern {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-create-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        color: white;
+    }
+    
+    .btn-cancel-modern {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        color: #4a5568;
+        border-radius: 10px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel-modern:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+        color: #2d3748;
+        transform: translateY(-1px);
+    }
+    
+    .row-enhanced {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .col-enhanced {
+        flex: 1;
+    }
+    
+    .floating-emojis {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    
+    .floating-emoji {
+        position: absolute;
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 2rem;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .floating-emoji:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+    .floating-emoji:nth-child(2) { top: 60%; right: 15%; animation-delay: 2s; }
+    .floating-emoji:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+    
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    @@media (max-width: 768px) {
+        .create-hero {
+            padding: 2rem 0;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+        
+        .row-enhanced {
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        .header-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="create-hero">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">🏁 Create Your Race Event</h1>
+        <p class="lead">Challenge runners and create an amazing racing experience</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card create-card">
+                <div class="card-header-modern">
+                    <div class="floating-emojis">
+                        <div class="floating-emoji">🏃‍♂️</div>
+                        <div class="floating-emoji">🏁</div>
+                        <div class="floating-emoji">🏆</div>
+                    </div>
+                    <div class="header-content">
+                        <h3 class="header-title">🏃‍♂️ New Race Event</h3>
+                        <p class="header-subtitle">Set up an exciting race for your community</p>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <form method="post" asp-action="Create" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="AppUserId" />
+                        
+                        <!-- Race Information -->
+                        <div class="section-title">
+                            <i class="fas fa-flag-checkered text-warning"></i>
+                            Race Information
+                        </div>
+                        
+                        <div class="form-group-enhanced">
+                            <label asp-for="Title" class="form-label-modern">
+                                <i class="fas fa-trophy text-warning"></i>
+                                Race Title
+                            </label>
+                            <input asp-for="Title" class="form-control form-control-enhanced" placeholder="Enter race name (e.g., Summer 5K Challenge)" required>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group-enhanced">
+                            <label asp-for="Description" class="form-label-modern">
+                                <i class="fas fa-align-left text-warning"></i>
+                                Description
+                            </label>
+                            <textarea asp-for="Description" class="form-control form-control-enhanced" rows="4" placeholder="Describe your race event, distance, difficulty level, and what participants can expect..." required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group-enhanced">
+                            <label asp-for="RaceCategory" class="form-label-modern">
+                                <i class="fas fa-tags text-warning"></i>
+                                Race Category
+                            </label>
+                            <select asp-for="RaceCategory" asp-items="@Html.GetEnumSelectList<RaceCategory>()" class="form-select form-control-enhanced" required>
+                                <option value="">Choose the type of race event</option>
+                            </select>
+                            <span asp-validation-for="RaceCategory" class="text-danger"></span>
+                        </div>
+
+                        <!-- Race Photo -->
+                        <div class="form-group-enhanced">
+                            <label asp-for="Image" class="form-label-modern">
+                                <i class="fas fa-camera text-warning"></i>
+                                Race Photo
+                            </label>
+                            <input asp-for="Image" type="file" class="form-control form-control-enhanced" accept="image/*">
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                            <small class="text-muted">Upload a photo for your race event (optional)</small>
+                        </div>
+
+                        <!-- Location Information -->
+                        <div class="section-title">
+                            <i class="fas fa-map-marked-alt text-success"></i>
+                            Race Location
+                        </div>
+                        
+                        <div class="form-group-enhanced">
+                            <label asp-for="Address.Street" class="form-label-modern">
+                                <i class="fas fa-road text-success"></i>
+                                Street Address
+                            </label>
+                            <input asp-for="Address.Street" class="form-control form-control-enhanced" placeholder="Starting point address">
+                            <span asp-validation-for="Address.Street" class="text-danger"></span>
+                        </div>
+
+                        <div class="row-enhanced">
+                            <div class="col-enhanced">
+                                <div class="form-group-enhanced">
+                                    <label asp-for="Address.City" class="form-label-modern">
+                                        <i class="fas fa-city text-success"></i>
+                                        City
+                                    </label>
+                                    <input asp-for="Address.City" class="form-control form-control-enhanced" placeholder="Enter city">
+                                    <span asp-validation-for="Address.City" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-enhanced">
+                                <div class="form-group-enhanced">
+                                    <label asp-for="Address.State" class="form-label-modern">
+                                        <i class="fas fa-flag text-success"></i>
+                                        State
+                                    </label>
+                                    <input asp-for="Address.State" class="form-control form-control-enhanced" placeholder="Enter state">
+                                    <span asp-validation-for="Address.State" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end mt-4 pt-3" style="border-top: 1px solid #e2e8f0;">
+                            <a asp-controller="Race" asp-action="Index" class="btn btn-cancel-modern">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-create-modern">
+                                <i class="fas fa-flag-checkered me-2"></i>
+                                Create Race
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

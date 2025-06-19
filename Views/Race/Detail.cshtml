@@ -1,0 +1,157 @@
+﻿@model Race
+@{
+    ViewData["Title"] = "Race Details";
+    Layout = "_Layout";
+}
+
+<div class="main-container">
+    <nav aria-label="breadcrumb" role="navigation" class="bg-primary text-white">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/" class="text-white">Home</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Race")" class="text-white">Races</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            Race in @(Model.Address?.City ?? "Unknown"), @(Model.Address?.State ?? "Unknown")
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <section class="bg-white space-sm">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-7 mb-4 mb-sm-0">
+                    @if (!string.IsNullOrEmpty(Model.Image))
+                    {
+                        <img alt="Race Image" src="@Model.Image" class="rounded img-fluid" style="width: 100%; height: 400px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 100%; height: 400px;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-image fa-4x mb-3"></i>
+                                <p>No image available</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                <div class="col-lg-4 d-flex flex-column justify-content-between mr-auto ml-auto">
+                    <div>
+                        <h1 class="mb-2">@Model.Title</h1>
+                        <h2 class="lead mb-3">@(Model.Address?.City ?? "Unknown"), @(Model.Address?.State ?? "Unknown")</h2>
+                        <div>
+                            <span class="badge badge-warning mr-3">@Model.RaceCategory</span>
+                        </div>
+                        <div>
+                            <ul class="list-inline text-small d-inline-block mb-3">
+                                <li class="list-inline-item"><i class="fas fa-thumbs-up"></i> 214</li>
+                                <li class="list-inline-item"><i class="fas fa-comment"></i> 6</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="btn-group mb-2">
+                            <button type="button" class="btn btn-warning btn-lg">Join Race</button>
+                            <button type="button" class="btn btn-warning dropdown-toggle dropdown-toggle-split dropdown-toggle-no-arrow" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-h"></i>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-sm">
+                                <a class="dropdown-item" href="#">Register</a>
+                                <a class="dropdown-item" href="#">Share</a>
+                                <a class="dropdown-item" href="#">Save</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Report</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="space-sm">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-12 col-md-8 col-lg-7">
+                    <h5 class="mb-4">Race Details</h5>
+                    <article>
+                        @(Model.Description ?? "No description available for this race.")
+                    </article>
+                    <hr>
+                    <h5 class="mb-4">Discussion</h5>
+                    <div class="card">
+                        <div class="card-header bg-secondary d-flex justify-content-between">
+                            <button class="btn btn-secondary" type="button" data-target="#comment-reply" data-toggle="collapse" aria-expanded="false" aria-controls="comment-reply">Post a reply</button>
+                            <form class="d-flex align-items-center">
+                                <span class="mr-2 text-muted text-small text-nowrap">Sort by:</span>
+                                <select class="custom-select">
+                                    <option value="alpha">Alphabetical</option>
+                                    <option value="old-new" selected>Newest</option>
+                                    <option value="new-old">Popular</option>
+                                    <option value="recent">Recently Updated</option>
+                                </select>
+                            </form>
+                        </div>
+                        <div class="collapse" id="comment-reply">
+                            <form class="card-body">
+                                <div class="form-group">
+                                    <textarea class="form-control form-control-lg" id="comment-reply-text" name="comment-reply" rows="4" placeholder="Type your reply here"></textarea>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" name="notify-reply" id="check-notify">
+                                        <label class="custom-control-label text-small" for="check-notify">Notify me when someone replies</label>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button type="submit" class="btn btn-warning mr-3">Submit reply</button>
+                                    <a href="#comment-reply" class="text-small text-muted" data-toggle="collapse" aria-expanded="true" aria-controls="comment-reply">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                        <ul class="list-group list-group-flush list-group-comments">
+                            <!-- Comments would go here -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-md-4">
+                    <div class="card">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div><i class="fas fa-calendar mr-1"></i> Race Date</div>
+                                    <span>TBD</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div><i class="fas fa-tag mr-1"></i> Category</div>
+                                    <span>@Model.RaceCategory</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div><i class="fas fa-map-marker-alt mr-1"></i> Location</div>
+                                    <span>@(Model.Address?.Street ?? "TBD")</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div><i class="fas fa-users mr-1"></i> Participants</div>
+                                    <span>0</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,67 @@
+﻿@using RunGroopWebApp.Data.Enum
+@using RunGroopWebApp.ViewModels
+@model CreateClubViewModel
+@{
+    ViewData["Title"] = "Create Club";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <h2>Create New Running Club</h2>
+    
+    <form method="post" asp-action="Create" enctype="multipart/form-data">
+        <input type="hidden" asp-for="AppUserId" />
+        
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Club Name</label>
+            <input asp-for="Title" class="form-control" placeholder="Enter club name" required>
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe your club" required></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ClubCategory" class="form-label">Category</label>
+            <select asp-for="ClubCategory" asp-items="@Html.GetEnumSelectList<ClubCategory>()" class="form-select" required>
+                <option value="">Select a category</option>
+            </select>
+            <span asp-validation-for="ClubCategory" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Image" class="form-label">Club Photo</label>
+            <input asp-for="Image" type="file" class="form-control" accept="image/*">
+            <span asp-validation-for="Image" class="text-danger"></span>
+        </div>
+
+        <h4>Location</h4>
+        
+        <div class="mb-3">
+            <label asp-for="Address.Street" class="form-label">Street Address</label>
+            <input asp-for="Address.Street" class="form-control" placeholder="123 Main Street">
+            <span asp-validation-for="Address.Street" class="text-danger"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Address.City" class="form-label">City</label>
+                <input asp-for="Address.City" class="form-control" placeholder="Enter city">
+                <span asp-validation-for="Address.City" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Address.State" class="form-label">State</label>
+                <input asp-for="Address.State" class="form-control" placeholder="Enter state">
+                <span asp-validation-for="Address.State" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Create Club</button>
+            <a asp-controller="Club" asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+</div>

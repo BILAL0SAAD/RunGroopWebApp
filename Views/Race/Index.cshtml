@@ -1,0 +1,263 @@
+﻿@model IEnumerable<Race>
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+    
+    .race-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .race-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+    
+    .race-image {
+        height: 220px;
+        background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4ecdc4, #45b7d1);
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease infinite;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    @@keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .race-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .race-category {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+    
+    .race-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 220px);
+    }
+    
+    .race-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+    
+    .race-description {
+        color: #718096;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .race-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: auto;
+    }
+    
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+    
+    .btn-primary-custom:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-outline-custom {
+        border: 2px solid #e2e8f0;
+        background: transparent;
+        color: #4a5568;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+    
+    .btn-outline-custom:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        color: #2d3748;
+        transform: translateY(-1px);
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 0;
+    }
+    
+    .page-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff, #f1f5f9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .page-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .races-grid {
+        padding: 2rem 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #718096;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .hero-section {
+            padding: 2rem 0;
+        }
+        
+        .race-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="page-header">
+                <h1 class="page-title">🏃‍♂️ Upcoming Races</h1>
+                <p class="page-subtitle">
+                    Discover exciting running events and challenges in your area. 
+                    Join the community and push your limits!
+                </p>
+            </div>
+            <a asp-controller="Race" asp-action="Create" class="btn btn-light btn-lg">
+                <i class="fas fa-plus"></i> Create New Race
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Races Grid -->
+<div class="container races-grid">
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach(var race in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card race-card">
+                        <div class="race-image">
+                            <div class="race-overlay">
+                                <span>🏃‍♂️ @race.Title</span>
+                            </div>
+                            <div class="race-category">
+                                @race.RaceCategory
+                            </div>
+                        </div>
+                        
+                        <div class="race-body">
+                            <h3 class="race-title">@race.Title</h3>
+                            <p class="race-description">
+                                @(string.IsNullOrEmpty(race.Description) ? "Join this exciting race and challenge yourself!" : race.Description)
+                            </p>
+                            
+                            <div class="race-actions">
+                                <a href="@Url.Action("Detail", "Race", new { id = race.Id })" 
+                                   class="btn btn-primary-custom">
+                                    View Details
+                                </a>
+                                <a href="@Url.Action("Edit", "Race", new { id = race.Id })" 
+                                   class="btn btn-outline-custom">
+                                    Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🏃‍♂️</div>
+            <h3>No races available</h3>
+            <p>Check back later for upcoming running events!</p>
+            <a href="@Url.Action("Create", "Race")" class="btn btn-primary-custom mt-3">
+                Create New Race
+            </a>
+        </div>
+    }
+</div>

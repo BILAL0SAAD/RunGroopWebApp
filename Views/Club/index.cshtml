@@ -1,0 +1,212 @@
+﻿@using RunGroopWebApp.Data
+@model IEnumerable<Club>
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <!-- Header with Create Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-users me-2" style="color: #667eea;"></i>Running Clubs
+            </h2>
+            <p class="text-muted mb-0">Discover and join running communities near you</p>
+        </div>
+        <a asp-controller="Club" asp-action="Create" class="btn btn-primary" 
+           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; padding: 0.6rem 1.2rem;">
+            <i class="fas fa-plus me-2"></i>Create New Club
+        </a>
+    </div>
+
+    <!-- Clubs Grid -->
+    <div class="album py-4">
+        <div class="container-fluid">
+            @if (Model != null && Model.Any())
+            {
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                    @foreach(var item in Model)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0" style="border-radius: 15px; transition: all 0.3s ease;">
+                                <!-- Club Image/Placeholder -->
+                                <div class="position-relative" style="border-radius: 15px 15px 0 0; overflow: hidden;">
+                                    @if (!string.IsNullOrEmpty(item.Image))
+                                    {
+                                        <img src="@item.Image" class="card-img-top" alt="@item.Title" 
+                                             style="height: 200px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="card-img-top d-flex align-items-center justify-content-center" 
+                                             style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <div class="text-center text-white">
+                                                <i class="fas fa-running fa-3x mb-2 opacity-75"></i>
+                                                <h6 class="fw-bold opacity-90">@item.Title</h6>
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    <!-- Category Badge -->
+                                    <span class="position-absolute top-0 end-0 m-2 badge bg-light text-dark" 
+                                          style="border-radius: 20px; font-size: 0.75rem;">
+                                        @item.ClubCategory
+                                    </span>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body d-flex flex-column p-3">
+                                    <h5 class="card-title mb-2 fw-bold" style="color: #2d3748;">@item.Title</h5>
+                                    <p class="card-text text-muted mb-3 flex-grow-1" style="font-size: 0.9rem;">
+                                        @(item.Description?.Length > 100 ? item.Description.Substring(0, 100) + "..." : item.Description)
+                                    </p>
+                                    
+                                    <!-- Address if available -->
+                                    @if (item.Address != null)
+                                    {
+                                        <div class="mb-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                @item.Address.City, @item.Address.State
+                                            </small>
+                                        </div>
+                                    }
+
+                                    <!-- Action Buttons -->
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-controller="Club" asp-action="Detail" asp-route-id="@item.Id" 
+                                                   class="btn btn-sm btn-outline-primary" style="border-radius: 8px 0 0 8px;">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                                <a asp-controller="Club" asp-action="Edit" asp-route-id="@item.Id" 
+                                                   class="btn btn-sm btn-outline-secondary" style="border-radius: 0;">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                                
+                                                <!-- Delete Button - Only for Admins -->
+                                                @if (User.IsInRole("admin"))
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            style="border-radius: 0 8px 8px 0;"
+                                                            onclick="confirmDelete('@item.Id', '@item.Title')">
+                                                        <i class="fas fa-trash me-1"></i>Delete
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-users fa-4x text-muted opacity-50"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No Running Clubs Yet</h4>
+                    <p class="text-muted mb-4">Be the first to create a running club in your community!</p>
+                    <a asp-controller="Club" asp-action="Create" class="btn btn-primary btn-lg" 
+                       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px;">
+                        <i class="fas fa-plus me-2"></i>Create First Club
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-2">Are you sure you want to delete the club:</p>
+                <p class="fw-bold mb-3" id="clubNameToDelete"></p>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <small>This action cannot be undone. All club data will be permanently removed.</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" style="border-radius: 10px;">
+                        <i class="fas fa-trash me-1"></i>Yes, Delete Club
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Delete confirmation functionality
+        function confirmDelete(clubId, clubTitle) {
+            // Set the club name in the modal
+            document.getElementById('clubNameToDelete').textContent = clubTitle;
+            
+            // Set the form action to the delete URL
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = '@Url.Action("Delete", "Club")/' + clubId;
+            
+            // Show the modal
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+
+        // Add hover effects to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        .card {
+            transition: all 0.3s ease !important;
+        }
+        
+        .btn-group .btn {
+            border-right: none;
+        }
+        
+        .btn-group .btn:not(:first-child) {
+            border-left: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .btn-group .btn:hover {
+            z-index: 2;
+        }
+        
+        .badge {
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+        }
+    </style>
+}

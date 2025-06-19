@@ -1,0 +1,373 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RunGroopWebApp</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RunGroopWebApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <style>
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .profile-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .profile-icon:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 25px;
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .user-profile:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .user-role {
+            font-size: 0.75rem;
+            color: #718096;
+            margin: 0;
+        }
+        
+        .profile-dropdown {
+            position: relative;
+        }
+        
+        .dropdown-menu-custom {
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .dropdown-item-custom {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dropdown-item-custom:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .dropdown-item-custom.text-danger:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @@media (max-width: 768px) {
+            .profile-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1.3rem;
+            }
+            
+            .user-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-running me-2"></i>RunGroop
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Club" asp-action="Index">
+                                <i class="fas fa-users me-1"></i>Clubs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Race" asp-action="Index">
+                                <i class="fas fa-flag-checkered me-1"></i>Races
+                            </a>
+                        </li>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <!-- Profile Section -->
+                    <div class="profile-section">
+                        <!-- Admin Dashboard Button - Only visible to admins -->
+                        @if (User.IsInRole("admin"))
+                        {
+                            <a asp-area="" asp-controller="Dashboard" asp-action="Index" 
+                               class="btn btn-sm btn-outline-primary me-3" 
+                               style="border-radius: 20px; padding: 0.4rem 1rem; border: 2px solid #667eea; color: #667eea; font-weight: 600; transition: all 0.3s ease;"
+                               onmouseover="this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; this.style.color='white'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'"
+                               onmouseout="this.style.background='transparent'; this.style.color='#667eea'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                <i class="fas fa-tachometer-alt me-1"></i>Admin Dashboard
+                            </a>
+                        }
+                        
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <!-- For logged-in users -->
+                            <div class="profile-dropdown dropdown">
+                                <div class="user-profile dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                                    <div class="user-avatar">
+                                        @{
+                                            var userInitials = User.Identity.Name?.Substring(0, Math.Min(2, User.Identity.Name.Length)).ToUpper() ?? "U";
+                                        }
+                                        @userInitials
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name">@(User.Identity.Name ?? "User")</div>
+                                        <div class="user-role">Runner</div>
+                                    </div>
+                                </div>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                    <li>
+                                        <a class="dropdown-item dropdown-item-custom" href="#" onclick="showComingSoon('Profile')">
+                                            <i class="fas fa-user"></i>Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item dropdown-item-custom" href="#" onclick="showComingSoon('Settings')">
+                                            <i class="fas fa-cog"></i>Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item dropdown-item-custom" href="#" onclick="showComingSoon('My Races')">
+                                            <i class="fas fa-trophy"></i>My Races
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item dropdown-item-custom" href="#" onclick="showComingSoon('My Clubs')">
+                                            <i class="fas fa-users"></i>My Clubs
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item dropdown-item-custom text-danger" href="#" onclick="confirmLogout()">
+                                            <i class="fas fa-sign-out-alt"></i>Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Profile Icon Dropdown for non-logged-in users -->
+                            <div class="profile-dropdown dropdown">
+                                <div class="profile-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                    <li>
+                                        <a asp-area="" asp-controller="Account" asp-action="Login" class="dropdown-item dropdown-item-custom">
+                                            <i class="fas fa-sign-in-alt"></i>Login
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-area="" asp-controller="Account" asp-action="Register" class="dropdown-item dropdown-item-custom">
+                                            <i class="fas fa-user-plus"></i>Sign Up
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt me-2 text-danger"></i>Confirm Logout
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="mb-0">Are you sure you want to logout from RunGroop?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <a href="@Url.Action("Logout", "Account")" class="btn btn-danger" style="border-radius: 10px;">
+                        <i class="fas fa-sign-out-alt me-1"></i>Yes, Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Coming Soon Modal -->
+    <div class="modal fade" id="comingSoonModal" tabindex="-1" aria-labelledby="comingSoonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="comingSoonModalLabel">
+                        <i class="fas fa-construction me-2 text-warning"></i>Coming Soon
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-2">
+                    <p class="mb-0" id="comingSoonMessage">This feature is coming soon!</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" style="border-radius: 10px;">
+                        <i class="fas fa-check me-1"></i>Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - RunGroopWebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // Logout confirmation
+        function confirmLogout() {
+            const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+            logoutModal.show();
+        }
+        
+        // Coming soon modal
+        function showComingSoon(featureName) {
+            const comingSoonModal = new bootstrap.Modal(document.getElementById('comingSoonModal'));
+            document.getElementById('comingSoonMessage').textContent = `The ${featureName} feature is coming soon! We're working hard to bring you this functionality.`;
+            comingSoonModal.show();
+        }
+        
+        // Welcome animation for logged-in users
+        document.addEventListener('DOMContentLoaded', function() {
+            const userProfile = document.querySelector('.user-profile');
+            if (userProfile) {
+                userProfile.style.animation = 'fadeInRight 0.6s ease-out';
+            }
+        });
+    </script>
+    
+    <style>
+        @@keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
