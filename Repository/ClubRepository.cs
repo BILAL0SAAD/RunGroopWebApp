@@ -19,7 +19,7 @@ namespace RunGroopWebApp.Repository
             return await _context.Clubs.Include(c => c.Address).ToListAsync();
         }
 
-        public async Task<Club?> GetByIdAsync(int id) // Changed return type to nullable
+        public async Task<Club?> GetByIdAsync(int id)
         {
             return await _context.Clubs.Include(c => c.Address).FirstOrDefaultAsync(c => c.Id == id);
         }
@@ -32,6 +32,14 @@ namespace RunGroopWebApp.Repository
         public async Task<IEnumerable<Club>> GetClubByCity(string city)
         {
             return await _context.Clubs.Include(c => c.Address).Where(c => c.Address.City.Contains(city)).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Club>> GetClubsByUserAsync(string userId)
+        {
+            return await _context.Clubs
+                .Include(c => c.Address)
+                .Where(c => c.AppUserId == userId)
+                .ToListAsync();
         }
 
         public bool Add(Club club)
@@ -57,5 +65,6 @@ namespace RunGroopWebApp.Repository
             var saved = _context.SaveChanges();
             return saved > 0;
         }
+
     }
 }

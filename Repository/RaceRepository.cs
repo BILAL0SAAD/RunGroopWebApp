@@ -8,33 +8,16 @@ namespace RunGroopWebApp.Repository
 {
     public class RaceRepository : IRaceRepository
     {
-        private readonly ApplicationDbContext _context; // Changed from ApplicationDBContext
+        private readonly ApplicationDbContext _context;
 
-        public RaceRepository(ApplicationDbContext context) // Changed from ApplicationDBContext
+        public RaceRepository(ApplicationDbContext context)
         {
             _context = context;
-        }
-
-        public bool Add(Race race)
-        {
-            _context.Add(race);
-            return Save();
-        }
-
-        public bool Delete(Race race)
-        {
-            _context.Remove(race);
-            return Save();
         }
 
         public async Task<IEnumerable<Race>> GetAll()
         {
             return await _context.Races.Include(r => r.Address).ToListAsync();
-        }
-
-        public async Task<IEnumerable<Race>> GetAllRacesByCity(string city)
-        {
-            return await _context.Races.Include(r => r.Address).Where(c => c.Address.City.Contains(city)).ToListAsync();
         }
 
         public async Task<Race?> GetByIdAsync(int id)
@@ -44,7 +27,20 @@ namespace RunGroopWebApp.Repository
 
         public async Task<Race?> GetByIdAsyncNoTracking(int id)
         {
-            return await _context.Races.Include(r => r.Address).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id); // Fixed - added WHERE clause
+            return await _context.Races.Include(r => r.Address).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<IEnumerable<Race>> GetAllRacesByCity(string city)
+        {
+            return await _context.Races.Include(r => r.Address).Where(c => c.Address.City.Contains(city)).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Race>> GetRacesByUserAsync(string userId)
+        {
+            return await _context.Races
+                .Include(r => r.Address)
+                .Where(r => r.AppUserId == userId)
+                .ToListAsync();
         }
 
         public async Task<int> GetCountAsync()
@@ -74,16 +70,28 @@ namespace RunGroopWebApp.Repository
                 .ToListAsync();
         }
 
-        public bool Save()
+        public bool Add(Race race)
         {
-            var saved = _context.SaveChanges();
-            return saved > 0;
+            _context.Add(race);
+            return Save();
         }
 
         public bool Update(Race race)
         {
             _context.Update(race);
             return Save();
+        }
+
+        public bool Delete(Race race)
+        {
+            _context.Remove(race);
+            return Save();
+        }
+
+        public bool Save()
+        {
+            var saved = _context.SaveChanges();
+            return saved > 0;
         }
     }
 }

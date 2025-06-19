@@ -3,6 +3,7 @@ using RunGroopWebApp.Data;
 using RunGroopWebApp.Interfaces;
 using RunGroopWebApp.Models;
 
+
 namespace RunGroopWebApp.Repository
 {
     public class DashboardRepository : IDashboardRepository
@@ -15,19 +16,41 @@ namespace RunGroopWebApp.Repository
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
+
         public async Task<List<Club>> GetAllUserClubs()
         {
-            var curUser = _httpContextAccessor.HttpContext?.User;
-            var userClubs = _context.Clubs.Where(r => r.AppUser.Id == curUser.ToString());
-            return userClubs.ToList();
+            var curUserId = _httpContextAccessor.HttpContext?.User.GetUserId();
+
+            if (string.IsNullOrEmpty(curUserId))
+            {
+                return new List<Club>();
+            }
+
+            var userClubs = await _context.Clubs
+                .Include(c => c.Address)
+                .Where(c => c.AppUserId == curUserId)
+                .ToListAsync();
+
+            return userClubs;
         }
 
         public async Task<List<Race>> GetAllUserRaces()
         {
-            var curUser = _httpContextAccessor.HttpContext?.User;
-            var userRaces = _context.Races.Where(r => r.AppUser.Id == curUser.ToString());
-            return userRaces.ToList();
+            var curUserId = _httpContextAccessor.HttpContext?.User.GetUserId();
+
+            if (string.IsNullOrEmpty(curUserId))
+            {
+                return new List<Race>();
+            }
+
+            var userRaces = await _context.Races
+                .Include(r => r.Address)
+                .Where(r => r.AppUserId == curUserId)
+                .ToListAsync();
+
+            return userRaces;
         }
+
         public async Task<AppUser> GetUserById(string id)
         {
             return await _context.Users.FindAsync(id);

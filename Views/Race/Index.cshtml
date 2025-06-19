@@ -138,6 +138,23 @@
         transform: translateY(-1px);
     }
     
+    .btn-danger-custom {
+        background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+        color: white;
+    }
+    
+    .btn-danger-custom:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+        color: white;
+    }
+    
     .page-header {
         text-align: center;
         margin-bottom: 0;
@@ -202,9 +219,12 @@
                     Join the community and push your limits!
                 </p>
             </div>
-            <a asp-controller="Race" asp-action="Create" class="btn btn-light btn-lg">
-                <i class="fas fa-plus"></i> Create New Race
-            </a>
+            @if (User.IsInRole("admin"))
+            {
+                <a asp-controller="Race" asp-action="Create" class="btn btn-light btn-lg">
+                    <i class="fas fa-plus"></i> Create New Race
+                </a>
+            }
         </div>
     </div>
 </section>
@@ -236,12 +256,21 @@
                             <div class="race-actions">
                                 <a href="@Url.Action("Detail", "Race", new { id = race.Id })" 
                                    class="btn btn-primary-custom">
-                                    View Details
+                                    <i class="fas fa-eye me-1"></i>View Details
                                 </a>
-                                <a href="@Url.Action("Edit", "Race", new { id = race.Id })" 
-                                   class="btn btn-outline-custom">
-                                    Edit
-                                </a>
+                                
+                                @if (User.IsInRole("admin"))
+                                {
+                                    <a href="@Url.Action("Edit", "Race", new { id = race.Id })" 
+                                       class="btn btn-outline-custom">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                    
+                                    <button type="button" class="btn btn-danger-custom" 
+                                            onclick="confirmRaceDelete('@race.Id', '@race.Title')">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                }
                             </div>
                         </div>
                     </div>
@@ -255,9 +284,62 @@
             <div class="empty-state-icon">🏃‍♂️</div>
             <h3>No races available</h3>
             <p>Check back later for upcoming running events!</p>
-            <a href="@Url.Action("Create", "Race")" class="btn btn-primary-custom mt-3">
-                Create New Race
-            </a>
+            @if (User.IsInRole("admin"))
+            {
+                <a href="@Url.Action("Create", "Race")" class="btn btn-primary-custom mt-3">
+                    <i class="fas fa-plus me-2"></i>Create New Race
+                </a>
+            }
         </div>
     }
 </div>
+
+<!-- Delete Confirmation Modal for Races -->
+<div class="modal fade" id="raceDeleteModal" tabindex="-1" aria-labelledby="raceDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger" id="raceDeleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Race Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-2">Are you sure you want to delete the race:</p>
+                <p class="fw-bold mb-3" id="raceNameToDelete"></p>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <small>This action cannot be undone. All race data will be permanently removed.</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <form id="raceDeleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" style="border-radius: 10px;">
+                        <i class="fas fa-trash me-1"></i>Yes, Delete Race
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Race delete confirmation functionality
+        function confirmRaceDelete(raceId, raceTitle) {
+            // Set the race name in the modal
+            document.getElementById('raceNameToDelete').textContent = raceTitle;
+            
+            // Set the form action to the delete URL
+            const deleteForm = document.getElementById('raceDeleteForm');
+            deleteForm.action = '@Url.Action("Delete", "Race")/' + raceId;
+            
+            // Show the modal
+            const deleteModal = new bootstrap.Modal(document.getElementById('raceDeleteModal'));
+            deleteModal.show();
+        }
+    </script>
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RunGroopWebApp.Data;
 using RunGroopWebApp.Interfaces;
@@ -13,31 +14,42 @@ namespace RunGroopWebApp.Controllers
     {
         private readonly IRaceRepository _raceRepository;
         private readonly IPhotoService _photoService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RaceController(IRaceRepository raceRepository, IPhotoService photoService)
+        public RaceController(IRaceRepository raceRepository, IPhotoService photoService, IHttpContextAccessor httpcontextAccessor)
         {
             _raceRepository = raceRepository;
             _photoService = photoService;
+            _httpContextAccessor = httpcontextAccessor;
         }
 
+        // Public - everyone can view races
         public async Task<IActionResult> Index()
         {
             var races = await _raceRepository.GetAll();
             return View(races);
         }
 
+        // Public - everyone can view race details
         public async Task<IActionResult> Detail(int id)
         {
             var race = await _raceRepository.GetByIdAsync(id);
             return View(race);
         }
 
+        // ADMIN ONLY - Create Race GET
+        [HttpGet]
+        [Authorize(Roles = "admin")]
         public IActionResult Create()
         {
-            return View();
+            var curUserID = _httpContextAccessor.HttpContext.User.GetUserId();
+            var createRaceViewModel = new CreateRaceViewModel { AppUserId = curUserID };
+            return View(createRaceViewModel);
         }
 
+        // ADMIN ONLY - Create Race POST
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Create(CreateRaceViewModel raceVM)
         {
             Console.WriteLine($"Form submitted - Title: {raceVM.Title}");
@@ -55,6 +67,7 @@ namespace RunGroopWebApp.Controllers
                         Title = raceVM.Title,
                         Description = raceVM.Description,
                         Image = result.Url.ToString(),
+                        AppUserId = raceVM.AppUserId,
                         RaceCategory = raceVM.RaceCategory,
                         Address = new Address
                         {
@@ -65,6 +78,7 @@ namespace RunGroopWebApp.Controllers
                     };
 
                     _raceRepository.Add(race);
+                    TempData["Success"] = "Race created successfully!";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -83,11 +97,16 @@ namespace RunGroopWebApp.Controllers
 
             return View(raceVM);
         }
+
+        // ADMIN ONLY - Edit Race GET
+        [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var race = await _raceRepository.GetByIdAsync(id);
             if (race == null) return View("Error");
-            var RaceVM = new EditRaceViewModel
+
+            var raceVM = new EditRaceViewModel
             {
                 Title = race.Title,
                 Description = race.Description,
@@ -95,51 +114,91 @@ namespace RunGroopWebApp.Controllers
                 Address = race.Address,
                 AddressId = race.AddressId,
                 RaceCategory = race.RaceCategory,
-
             };
-            return View(RaceVM);
+            return View(raceVM);
         }
+
+        // ADMIN ONLY - Edit Race POST
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, EditRaceViewModel RaceVM)
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Edit(int id, EditRaceViewModel raceVM)
         {
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("", "Failed to edit club");
-                return View("Edit", RaceVM);
+                ModelState.AddModelError("", "Failed to edit race");
+                return View("Edit", raceVM);
             }
-            var userClub = await _raceRepository.GetByIdAsyncNoTracking(id);
-            if (userClub != null)
+
+            var userRace = await _raceRepository.GetByIdAsyncNoTracking(id);
+            if (userRace != null)
             {
                 try
                 {
-                    await _photoService.DeletePhotoAsync(userClub.Image);
+                    // Delete old photo if it exists
+                    if (!string.IsNullOrEmpty(userRace.Image))
+                    {
+                        await _photoService.DeletePhotoAsync(userRace.Image);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Could not delet photo");
-                    return View(RaceVM);
+                    ModelState.AddModelError("", "Could not delete photo");
+                    return View(raceVM);
                 }
-                var photoResult = await _photoService.AddPhotoAsync(RaceVM.Image);
+
+                var photoResult = await _photoService.AddPhotoAsync(raceVM.Image);
 
                 var race = new Race
                 {
                     Id = id,
-                    Title = RaceVM.Title,
-                    Description = RaceVM.Description,
+                    Title = raceVM.Title,
+                    Description = raceVM.Description,
                     Image = photoResult.Url.ToString(),
-                    AddressId = RaceVM.AddressId,
-                    Address = RaceVM.Address,
+                    AddressId = raceVM.AddressId,
+                    Address = raceVM.Address,
+                    RaceCategory = raceVM.RaceCategory
                 };
 
                 _raceRepository.Update(race);
-
-                return RedirectToAction("index");
-
+                TempData["Success"] = "Race updated successfully!";
+                return RedirectToAction("Index");
             }
             else
             {
-                return View(RaceVM);
+                return View(raceVM);
             }
+        }
+
+        // ADMIN ONLY - Delete Race
+        [HttpPost]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var race = await _raceRepository.GetByIdAsync(id);
+            if (race == null)
+            {
+                TempData["Error"] = "Race not found.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                // Delete the image from cloud storage
+                if (!string.IsNullOrEmpty(race.Image))
+                {
+                    await _photoService.DeletePhotoAsync(race.Image);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error but don't fail the deletion
+                Console.WriteLine($"Error deleting photo: {ex.Message}");
+            }
+
+            // Delete the race from database
+            _raceRepository.Delete(race);
+            TempData["Success"] = "Race deleted successfully!";
+            return RedirectToAction("Index");
         }
     }
 }
